@@ -1,0 +1,26 @@
+#Prometheus Alerts for Nexus Metrics
+#Define alerting rules for CPU, Memory, and other 
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nexus-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: nexus-alerts
+    rules:
+    - alert: HighCPUUsage
+      expr: avg(rate(container_cpu_usage_seconds_total{container="nexus", pod="nexus-*"}[1m])) > 80
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Nexus CPU usage is over 80%"
+
+    - alert: HighMemoryUsage
+      expr: avg(container_memory_usage_bytes{container="nexus", pod="nexus-*"} / container_spec_memory_limit_bytes{container="nexus", pod="nexus-*"}) > 0.8
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Nexus memory usage is over 80%"

@@ -1,0 +1,21 @@
+#Configure Alertmanager to Send Email Alerts
+gapiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+data:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: 'smtp.gmail.com:587'
+      smtp_from: 'your-email@gmail.com'
+      smtp_auth_username: 'your-email@gmail.com'
+      smtp_auth_password: 'your-app-password'
+
+    route:
+      receiver: email-alert
+    receivers:
+      - name: email-alert
+        email_configs:
+          - to: 'receiver@example.com'
+

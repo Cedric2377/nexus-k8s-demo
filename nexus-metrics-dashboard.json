@@ -1,0 +1,36 @@
+/*sample of an exported custom grafana dashbord*/
+
+{
+    "dashboard": {
+      "id": null,
+      "uid": "nexus-metrics-dashboard",
+      "title": "Nexus Metrics Dashboard",
+      "tags": [],
+      "timezone": "browser",
+      "panels": [
+        {
+          "title": "CPU Usage",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "rate(container_cpu_usage_seconds_total{container=\"nexus\", pod=\"nexus-*\"}[1m])",
+              "legendFormat": "{{ pod }}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "title": "Memory Usage",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "container_memory_usage_bytes{container=\"nexus\", pod=\"nexus-*\"}",
+              "legendFormat": "{{ pod }}",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }
+  }
+  

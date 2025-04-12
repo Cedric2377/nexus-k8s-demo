@@ -1,0 +1,32 @@
+#For HTTPS access to Nexus, we configure Ingress with TLS
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nexus-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - nexus.local
+    secretName: nexus-tls
+  rules:
+  - host: nexus.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nexus-service
+            port:
+              number: 80
+
+
+#This sets up HTTPS with the nexus.local domain.
+#The nexus-tls secret will store the self-signed TLS certificate and key.
+#Add the TLS Certificate and Key
+#Create the TLS secret using the self-signed certificates:
+#kubectl create secret tls nexus-tls --cert=nexus.local.crt --key=nexus.local.key
+#Ensure that your certificates (nexus.local.crt and nexus.local.key) are in the current 
