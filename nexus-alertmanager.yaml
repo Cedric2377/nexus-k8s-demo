@@ -1,5 +1,5 @@
 #Configure Alertmanager to Send Email Alerts
-gapiVersion: v1
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: alertmanager-config
@@ -8,9 +8,9 @@ data:
   alertmanager.yml: |
     global:
       smtp_smarthost: 'smtp.gmail.com:587'
-      smtp_from: 'your-email@gmail.com'
-      smtp_auth_username: 'your-email@gmail.com'
-      smtp_auth_password: 'your-app-password'
+      smtp_from: ${SMTP_FROM}
+      smtp_auth_username: ${SMTP_AUTH_USERNAME}
+      smtp_auth_password: ${SMTP_AUTH_PASSWORD}
 
     route:
       receiver: email-alert
@@ -18,4 +18,36 @@ data:
       - name: email-alert
         email_configs:
           - to: 'receiver@example.com'
+---
+
+containers:
+  - name: alertmanager
+    image: prom/alertmanager:latest
+    volumeMounts:
+      - name: alertmanager-config-volume
+        mountPath: /etc/alertmanager
+        subPath: alertmanager.yml
+    env:
+      - name: SMTP_FROM
+        valueFrom:
+          secretKeyRef:
+            name: alertmanager-smtp-creds
+            key: smtp-from
+      - name: SMTP_AUTH_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: alertmanager-smtp-creds
+            key: smtp-auth-username
+      - name: SMTP_AUTH_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: alertmanager-smtp-creds
+            key: smtp-auth-password
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "100m"
+      limits:
+        memory: "256Mi"
+        cpu: "500m"
 

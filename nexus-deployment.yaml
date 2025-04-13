@@ -1,8 +1,43 @@
 # Nexus app with resource limits, PVC, and Ingress
+# PersistentVolume for Nexus (static hostPath)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nexus-pv
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  hostPath:
+    path: /mnt/data/nexus
+
+---
+
+# PersistentVolumeClaim in 'monitoring' namespace
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nexus-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: ""
+
+---
+
+# Nexus Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nexus
+  namespace: monitoring
 spec:
   replicas: 1
   selector:
@@ -31,12 +66,16 @@ spec:
       volumes:
       - name: nexus-storage
         persistentVolumeClaim:
-          claimName: nexus-nfs-pvc
+          claimName: nexus-pvc
+
 ---
+
+# Nexus Service
 apiVersion: v1
 kind: Service
 metadata:
   name: nexus-service
+  namespace: monitoring
 spec:
   selector:
     app: nexus
@@ -45,3 +84,4 @@ spec:
     port: 80
     targetPort: 8081
   type: LoadBalancer
+
